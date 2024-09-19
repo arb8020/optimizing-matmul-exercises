@@ -3,7 +3,7 @@ import sys
 import os
 
 def load_solution_kernel(kernel_number):
-    solution_path = f"../solutions/kernel_{kernel_number}_solution.cu"
+    solution_path = f"./solutions/kernel_{kernel_number}_solution.cu"
     if os.path.exists(solution_path):
         with open(solution_path, 'r') as f:
             return f.read()
