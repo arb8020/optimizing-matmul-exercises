@@ -52,7 +52,7 @@ def check_solution(kernel_number, user_code, M=4096, N=4096, K=4096):
         return
 
     print("Testing your implementation...")
-    user_result = compile_and_run_kernel(user_code, f"user_kernel_{kernel_number}", M, N, K)
+    user_result = compile_and_run_kernel(user_code, f"kernel_{kernel_number}", M, N, K)
     
     if not user_result:
         print("Your implementation failed to compile or run.")
