@@ -1,6 +1,6 @@
 # optimizing-matmul-exercises
 
-hi there! this repo is an hands on accompaniment to this great article: https://siboehm.com/articles/22/CUDA-MMM
+hi there! this repo is an hands on accompaniment to this great article: https://siboehm.com/articles/22/CUDA-MMM, also inspired by https://github.com/srush/GPU-Puzzles
 
 along with the above article, this notebook will guide you through writing progressively fancier CUDA kernels, with explanations and skeleton code to assist you. 
 
