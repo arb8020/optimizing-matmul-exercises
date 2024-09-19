@@ -1,5 +1,4 @@
 import subprocess
-import sys
 import os
 
 def load_solution_kernel(kernel_number):
@@ -12,20 +11,16 @@ def load_solution_kernel(kernel_number):
         return None
 
 def compile_and_run_kernel(kernel_code, kernel_name, M, N, K):
-    # Save the kernel code to a temporary file
-    with open(f"{kernel_name}.cu", "w") as f:
+    # Save the kernel code to a temporary .cu file
+    with open(f"{kernel_name}.cpp", "w") as f:
         f.write(kernel_code)
     
-    # Determine which test_sgemm file to use
-    if kernel_name in ['kernel_1', 'kernel_2', 'kernel_3']:
-        test_sgemm = 'test_sgemm.o'
-    elif kernel_name in ['kernel_4', 'kernel_5']:
-        test_sgemm = 'test_sgemm2.o'
-    else:
-        test_sgemm = 'test_sgemm3.o'
-    
+    # We are assuming that the kernel source is a .cpp file for syntax highlighting purposes,
+    # so we'll copy it to a .cu file before compilation
+    subprocess.run(["cp", f"{kernel_name}.cpp", f"{kernel_name}.cu"])
+
     # Compile the kernel
-    compile_result = subprocess.run(["nvcc", f"{kernel_name}.cu", test_sgemm, "-o", kernel_name, "-lcublas"], capture_output=True, text=True)
+    compile_result = subprocess.run(["nvcc", f"{kernel_name}.cu", "-o", kernel_name, "-lcublas"], capture_output=True, text=True)
     if compile_result.returncode != 0:
         print("Compilation failed:")
         print(compile_result.stderr)
@@ -37,11 +32,11 @@ def compile_and_run_kernel(kernel_code, kernel_name, M, N, K):
         print("Execution failed:")
         print(run_result.stderr)
         return None
-    
+
     # Parse the output
     lines = run_result.stdout.strip().split('\n')
     is_correct = "The matrix multiplication is correct!" in lines[-1]
-    performance = float(lines[-2].split()[-1])
+    performance = float(lines[-2].split()[-1]) if len(lines) > 1 else 0.0
     
     return is_correct, performance
 
@@ -81,6 +76,7 @@ def check_solution(kernel_number, user_code, M=4096, N=4096, K=4096):
         print("\nGreat job! Your implementation is correct and faster than the reference.")
     else:
         print("\nWell done! Your implementation is correct and has similar performance to the reference.")
+
 def check_roofline_calculation(user_function):
     # Load the solution function
     from solutions.roofline_solution import calculate_roofline as solution_function
@@ -111,3 +107,4 @@ def check_roofline_calculation(user_function):
         print("Congratulations! Your roofline calculation is correct.")
     else:
         print("There are some discrepancies in your calculation. Please check your implementation.")
+
