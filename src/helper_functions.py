@@ -36,9 +36,11 @@ def compile_and_run_kernel(kernel_code, kernel_name, M, N, K):
     # Parse the output
     lines = run_result.stdout.strip().split('\n')
     is_correct = "The matrix multiplication is correct!" in lines[-1]
-    print(lines)
-    performance = float(lines[-2].split()[-1]) if len(lines) > 1 else 0.0
-    
+    # Locate the line with performance information
+    performance_line = [line for line in lines if "Average Performance" in line][0]
+
+    # Extract the performance value and remove the "GFLOPS" unit
+    performance = float(performance_line.split()[-2])  # This will get the second-to-last element which is the numerical value 
     return is_correct, performance
 
 def check_solution(kernel_number, user_code, M=4096, N=4096, K=4096):
