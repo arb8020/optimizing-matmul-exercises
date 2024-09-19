@@ -81,6 +81,12 @@ def check_solution(kernel_number, user_code, M=4096, N=4096, K=4096):
         print("\nWell done! Your implementation is correct and has similar performance to the reference.")
 
 def check_roofline_calculation(user_function):
+
+    solutions_path = os.path.join(os.getcwd(), "solutions")
+    if solutions_path not in sys.path:
+        sys.path.append(solutions_path)
+
+
     # Load the solution function
     from solutions.roofline_solution import calculate_roofline as solution_function
 
