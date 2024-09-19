@@ -36,6 +36,7 @@ def compile_and_run_kernel(kernel_code, kernel_name, M, N, K):
     # Parse the output
     lines = run_result.stdout.strip().split('\n')
     is_correct = "The matrix multiplication is correct!" in lines[-1]
+    print(lines)
     performance = float(lines[-2].split()[-1]) if len(lines) > 1 else 0.0
     
     return is_correct, performance
