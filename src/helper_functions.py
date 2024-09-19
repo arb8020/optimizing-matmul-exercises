@@ -83,13 +83,18 @@ def check_solution(kernel_number, user_code, M=4096, N=4096, K=4096):
 
 def check_roofline_calculation(user_function):
 
-    solutions_path = os.path.join(os.getcwd(), "solutions")
-    if solutions_path not in sys.path:
-        sys.path.append(solutions_path)
+    solutions_path = os.path.join(os.getcwd(), "solutions", "roofline_solution.py")
+    
+    # Load the solution function using the absolute path
+    try:
+        spec = importlib.util.spec_from_file_location("roofline_solution", solutions_path)
+        roofline_solution = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(roofline_solution)
+        solution_function = roofline_solution.calculate_roofline
+    except Exception as e:
+        print(f"Error loading solution module: {e}")
+        return
 
-
-    # Load the solution function
-    from solutions.roofline_solution import calculate_roofline as solution_function
 
     # Test parameters
     m, n, k = 512, 512, 512
