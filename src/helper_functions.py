@@ -12,35 +12,28 @@ def load_solution_kernel(kernel_number):
         return None
 
 def compile_and_run_kernel(kernel_code, kernel_name, M, N, K):
-    # Save the kernel code to a temporary .cu file
     with open(f"{kernel_name}.cpp", "w") as f:
         f.write(kernel_code)
     
-    # We are assuming that the kernel source is a .cpp file for syntax highlighting purposes,
-    # so we'll copy it to a .cu file before compilation
     subprocess.run(["cp", f"{kernel_name}.cpp", f"{kernel_name}.cu"])
 
-    # Compile the kernel
     compile_result = subprocess.run(["nvcc", f"{kernel_name}.cu", "-o", kernel_name, "-lcublas"], capture_output=True, text=True)
     if compile_result.returncode != 0:
         print("Compilation failed:")
         print(compile_result.stderr)
         return None
     
-    # Run the kernel
     run_result = subprocess.run([f"./{kernel_name}", str(M), str(N), str(K)], capture_output=True, text=True)
     if run_result.returncode != 0:
         print("Execution failed:")
         print(run_result.stderr)
         return None
 
-    # Parse the output
     lines = run_result.stdout.strip().split('\n')
     is_correct = "The matrix multiplication is correct!" in lines[-1]
-    # Locate the line with performance information
+    
     performance_line = [line for line in lines if "Average Performance" in line][0]
 
-    # Extract the performance value and remove the "GFLOPS" unit
     performance = float(performance_line.split()[-2])  # This will get the second-to-last element which is the numerical value 
     return is_correct, performance
 
@@ -83,30 +76,26 @@ def check_solution(kernel_number, user_code, M=4096, N=4096, K=4096):
 
 def check_roofline_calculation(user_function):
 
-    solutions_path = os.path.join(os.getcwd(), "solutions", "roofline_solution.py")
-    
-    # Load the solution function using the absolute path
+    solutions_path = "./solutions/"
+    if solutions_path not in sys.path:
+        sys.path.append(solutions_path)
+
     try:
-        spec = importlib.util.spec_from_file_location("roofline_solution", solutions_path)
-        roofline_solution = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(roofline_solution)
-        solution_function = roofline_solution.calculate_roofline
-    except Exception as e:
-        print(f"Error loading solution module: {e}")
+        from solutions.roofline_solutions import calculate_roofline as solution_function
+    except ModuleNotFoundError as e:
+        print(f"ModuleNotFoundError: {e}")
+        print(f"Ensure that 'roofline_solution.py' is located in {solutions_path}")
         return
 
 
-    # Test parameters
     m, n, k = 512, 512, 512
     memory_bandwidth = 320  # GB/s
     computational_performance = 65  # TFLOPs
     data_type_size = 2  # bytes (for float16)
 
-    # Calculate results
     user_result = user_function(m, n, k, memory_bandwidth, computational_performance, data_type_size)
     solution_result = solution_function(m, n, k, memory_bandwidth, computational_performance, data_type_size)
 
-    # Compare results
     all_correct = True
     for key in solution_result:
         if user_result[key] is None:
@@ -122,4 +111,5 @@ def check_roofline_calculation(user_function):
         print("Congratulations! Your roofline calculation is correct.")
     else:
         print("There are some discrepancies in your calculation. Please check your implementation.")
+
 
